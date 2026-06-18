@@ -138,7 +138,7 @@ python rl/train.py --episodes 1000 --save-path models/dqn_agent.pt
 ![Pending recommendations](designs/04.png)
  
 ### Reports — risk overview (DQN vs. EOQ)
-![Inventory reports overview](designs/05.png)
+![Inventory reports overview](designs/)
 ![DQN vs EOQ comparison tab](designs/06.png)
  
 ## How to Use
