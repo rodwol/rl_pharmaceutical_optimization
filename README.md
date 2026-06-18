@@ -117,9 +117,9 @@ docker-compose up --build
 ```
  
 This will spin up three services:
-- `db` — PostgreSQL database on port `5432`
-- `api` — FastAPI backend on port `8000`
-- `dashboard` — Streamlit UI on port `8501`
+- `db` — PostgreSQL database on port 
+- `api` — FastAPI backend on port 
+- `dashboard` — Streamlit UI on port 
 ### 4. Access the application
  
 | Service | URL |
@@ -140,7 +140,7 @@ docker-compose up db
 # Run the API
 uvicorn app.main:app --reload --port 8000
  
-# Run the dashboard (separate terminal)
+# Run the dashboard
 streamlit run dashboard/app.py
 ```
  
@@ -151,6 +151,18 @@ python rl/train.py --episodes 1000 --save-path models/dqn_agent.pt
 ```
  
 ---
+
+### Design - Screenshots of the app interfaces
+![Dashboard home page](designs/01.png)
+ 
+### DQN recommendation
+![Stock count entry](designs/02.png)
+![Stock count with recommendation](designs/03.png)
+![Pending recommendations](designs/04.png)
+ 
+### Reports — risk overview (DQN vs. EOQ)
+![Inventory reports overview](designs/05.png)
+![DQN vs EOQ comparison tab](designs/06.png)
  
 ## How to Use
  
