@@ -203,44 +203,13 @@ rxguard-rl-pharmacy/
  
 ---
  
-## Methodology
- 
-### Synthetic Data Generation
- 
-Training data is generated synthetically but **calibrated against published Eritrean healthcare statistics**: baseline stockout rates (~20%) from Siele et al. (2022), antibiotic and NSAID demand distributions from Abdu et al. (2020) and Amaha et al. (2019), and lead time distributions typical of district-level supply chains in Sub-Saharan Africa.
- 
-### HMM Demand Regime Modeling
- 
-A Hidden Markov Model (hmmlearn) identifies latent demand states — **stable**, **surge** (outbreak/seasonal spike), and **disruption** (supply-side shock) — from the observed demand sequences. The inferred regime belief vector is incorporated into the MDP state space, giving the DQN agent richer context for decisions.
- 
-### Markov Decision Process
- 
-| Component | Definition |
-|---|---|
-| **State (S)** | Stock level, days since last order, pending order qty, 7-day demand signal, HMM regime belief |
-| **Action (A)** | Discrete order quantities: {0, Q_min, Q_mid, Q_max} |
-| **Reward (R)** | −10 per stockout day / −0.05 per unit overstocked / −5 per expired unit / +1 per day full availability |
-| **Discount (γ)** | 0.95 |
- 
-### Baseline Comparison
- 
-DQN agent performance is benchmarked against an **Economic Order Quantity (EOQ)** baseline and a **fixed periodic review** policy using:
-- Stockout frequency
-- Service level (% of demand days fully met)
-- Inventory holding cost
-- Medicine waste (expired units)
----
- 
-## Performance Metrics
- 
 > Results will be updated as training progresses.
  
-| Metric | EOQ Baseline | DQN Agent |
-|---|---|---|
-| Stockout Frequency | — | — |
-| Service Level | — | — |
-| Holding Cost | — | — |
-| Medicine Waste | — | — |
+## Evaluation Metric
+| Stockout Frequency |
+| Service Level |
+| Holding Cost | 
+| Medicine Waste |
  
 ---
  
@@ -262,13 +231,9 @@ DQN agent performance is benchmarked against an **Economic Order Quantity (EOQ)*
 **Author:** Rodas Goniche
 BSc. Software Engineering Capstone Project
 **Supervisor:** Simeon Nsabiyumva
- 
- 
+
 ---
  
 ## License
  
 This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
- 
-You are free to use, modify, and distribute this software for academic and non-commercial purposes with attribution.
- 
