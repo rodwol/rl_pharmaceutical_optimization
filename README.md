@@ -12,8 +12,6 @@
 8. [Methodology](#methodology)
 9. [Performance Metrics](#performance-metrics)
 10. [Challenges & Future Work](#challenges--future-work)
-11. [Credits](#credits)
-12. [License](#license)
 ---
  
 ## Project Description
@@ -21,35 +19,27 @@
 **Rebex** is an intelligent pharmaceutical inventory management system that uses **Deep Q-Network (DQN) Reinforcement Learning** to prevent essential medicine stockouts in Eritrean district hospital pharmacies.
  
 District hospital pharmacies in Eritrea are the primary point of medicine access for large portions of the population, yet essential medicine availability sits at around 80% — meaning roughly 1 in 5 prescribed medicines is unavailable at the point of care. Traditional inventory control methods such as Economic Order Quantity (EOQ) and manual periodic reviews cannot adapt to the unpredictable demand patterns, seasonal disease surges, and supply chain disruptions common in low-resource healthcare environments.
- 
-This system models the pharmacy inventory replenishment problem as a **Markov Decision Process (MDP)** and trains a DQN agent — augmented with a **Hidden Markov Model (HMM)** for demand regime detection — to generate optimal daily restocking recommendations. The trained agent is served through a RESTful FastAPI backend and surfaced to pharmacy staff via an interactive **Streamlit dashboard**.
- 
-**Why these technologies?**
-- **Python ecosystem (PyTorch, Stable-Baselines3, hmmlearn):** Mature, open-source, and well-documented RL tooling with minimal infrastructure cost — critical for resource-constrained environments.
-- **Streamlit:** Enables rapid development of a data-driven UI without requiring frontend engineering, making it maintainable by a single developer.
-- **PostgreSQL + Docker:** Lightweight, reliable, and portable — the containerized stack can be deployed on modest hardware found in district-level facilities.
-- **Synthetic data calibrated from literature:** Real aggregate statistics from Siele et al. (2022) and Abdu et al. (2020) parameterize the simulation, grounding it in Eritrean epidemiological realities.
 ---
  
 ## System Architecture
  
 ```
 ┌─────────────────────────────────┐
-│        Streamlit Dashboard       │  ← User Interface Layer
+│        Streamlit Dashboard       │
 │  (Inventory monitoring, alerts,  │
 │   replenishment recommendations) │
 └────────────────┬────────────────┘
-                 │ HTTP / REST
+                 │
 ┌────────────────▼────────────────┐
-│         FastAPI Backend          │  ← RL Inference Layer
+│         FastAPI Backend          │
 │  (DQN agent, HMM demand model,  │
 │   /api/recommend endpoint)       │
 └────────────────┬────────────────┘
-                 │ SQLAlchemy ORM
+                 │
 ┌────────────────▼────────────────┐
-│         PostgreSQL Database      │  ← Data Layer
-│  (Medicines, stock records,      │
-│   orders, recommendations)       │
+│         Database                │
+│  (Medicines, stock records,     │
+│   orders, recommendations)      │
 └─────────────────────────────────┘
 ```
  
@@ -89,7 +79,7 @@ This system models the pharmacy inventory replenishment problem as a **Markov De
  
 - [Docker](https://www.docker.com/get-started) and Docker Compose installed
 - Git installed
-- Python 3.10+ (if running outside Docker)
+- Python 3.10+
 ### 1. Clone the repository
  
 ```bash
@@ -97,20 +87,7 @@ git clone https://github.com/rodwol/rl_pharmaceutical_optimization.git
 cd rl_pharmaceutical_optimization
 ```
  
-### 2. Set up environment variables
- 
-```bash
-cp .env.example .env
-```
- 
-```env
-POSTGRES_USER=
-POSTGRES_PASSWORD=
-POSTGRES_DB=
-DATABASE_URL=
-```
- 
-### 3. Build and run with Docker Compose
+### 2. Build and run with Docker Compose
  
 ```bash
 docker-compose up --build
@@ -120,7 +97,7 @@ This will spin up three services:
 - `db` — PostgreSQL database on port 
 - `api` — FastAPI backend on port 
 - `dashboard` — Streamlit UI on port 
-### 4. Access the application
+### 3. Access the application
  
 | Service | URL |
 |---|---|
@@ -128,7 +105,7 @@ This will spin up three services:
 | FastAPI Docs (Swagger) | http:// |
 | Database |  |
  
-### 5. Running outside Docker (development mode)
+### 4. Running outside Docker (development mode)
  
 ```bash
 # Install dependencies
@@ -144,7 +121,7 @@ uvicorn app.main:app --reload --port 8000
 streamlit run dashboard/app.py
 ```
  
-### 6. Train the RL agent
+### 5. Train the RL agent
  
 ```bash
 python rl/train.py --episodes 1000 --save-path models/dqn_agent.pt
