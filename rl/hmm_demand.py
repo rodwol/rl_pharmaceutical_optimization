@@ -1,7 +1,5 @@
 """
-hmm_demand.py
-─────────────────────────────────────────────────────────────────────────
-Hidden Markov Model layer for latent demand/supply regime detection and
+Hidden Markov Model layer for latent demand regime detection and
 generation. This addresses the supervisor's comment directly:
  
     "Is there a way you can make it a Markov Decision Process and use HMMs?"
@@ -98,4 +96,3 @@ if __name__ == "__main__":
     model, hidden = fit_hmm_to_demand(demand)
     print(f"\nFitted HMM recovered {len(set(hidden))} distinct states from demand alone")
     print(f"Learned transition matrix:\n{np.round(model.transmat_, 3)}")
-    

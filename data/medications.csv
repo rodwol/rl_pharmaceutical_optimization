@@ -1,0 +1,16 @@
+medication_id,name,category,unit,shelf_life_days,unit_cost_usd
+M001,Artemether-Lumefantrine 20/120mg,Antimalarial,tablet,730,0.12
+M002,Quinine Sulfate 300mg,Antimalarial,tablet,730,0.08
+M003,Amoxicillin 500mg,Antibiotic,capsule,730,0.04
+M004,Ceftriaxone 1g Injection,Antibiotic,vial,730,0.9
+M005,Metronidazole 400mg,Antibiotic,tablet,730,0.03
+M006,Ciprofloxacin 500mg,Antibiotic,tablet,730,0.07
+M007,Co-trimoxazole 480mg,Antibiotic,tablet,730,0.02
+M008,Oxytocin 10IU Injection,MCH,ampoule,365,0.45
+M009,ORS Sachet,MCH,sachet,1460,0.05
+M010,Ferrous Sulfate + Folic Acid,MCH,tablet,730,0.02
+M011,Paracetamol 500mg,Analgesic,tablet,730,0.01
+M012,Ibuprofen 400mg,Analgesic,tablet,730,0.02
+M013,Metformin 500mg,Diabetes,tablet,730,0.03
+M014,Amlodipine 5mg,Cardiovascular,tablet,730,0.04
+M015,RDT Malaria Test Kit,Diagnostics,kit,730,0.55
