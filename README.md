@@ -1,14 +1,5 @@
 # Rebex: A Reinforcement Learning Approach to Essential Medicine Stockout Prevention in Eritrean District Hospital Pharmacies
  
-![Python](https://img.shields.io/badge/Python-3.10+-blue?logo=python)
-![Streamlit](https://img.shields.io/badge/Streamlit-Dashboard-red?logo=streamlit)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Database-336791?logo=postgresql)
-![Docker](https://img.shields.io/badge/Docker-Containerized-2496ED?logo=docker)
-![License](https://img.shields.io/badge/License-MIT-green)
-![Status](https://img.shields.io/badge/Status-In%20Development-yellow)
- 
----
- 
 ## Table of Contents
  
 1. [Project Description](#project-description)
