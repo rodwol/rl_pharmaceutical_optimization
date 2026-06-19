@@ -1,19 +1,13 @@
 """
-Hidden Markov Model layer for latent demand regime detection and
-generation. This addresses the supervisor's comment directly:
+Hidden Markov Model layer for latent demand state detection and
+generation.
  
-    "Is there a way you can make it a Markov Decision Process and use HMMs?"
- 
-Two uses of the HMM here:
-  1. GENERATIVE: sample a regime-switching sequence (stable/surge/disruption)
-     to drive the synthetic data generator, replacing the purely seasonal-
-     multiplier approach used in the previous script.
-  2. INFERENTIAL: fit an HMM on observed demand sequences to recover regime
-     *beliefs* (posterior probabilities), which become part of the MDP state
-     fed to the DQN agent later.
+HMM will be used for two purposes here:
+  1. Generation: create hidden demand states (stable, surge, disruption)
+  2. Inference Engine: observe demand and estimate which hidden state caused it.
  
 Regime parameters are imported from literature_params.py so every number
-traces back to a cited source.
+traces back to a cited source used in the data generation/
 """
  
 import numpy as np
