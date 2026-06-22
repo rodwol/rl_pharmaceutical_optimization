@@ -1,4 +1,4 @@
-# Rebex: A Reinforcement Learning Approach to Essential Medicine Stockout Prevention in Eritrean District Hospital Pharmacies
+# A Reinforcement Learning Approach to Essential Medicine Stockout Prevention in Eritrean District Hospital Pharmacies
  
 ## Table of Contents
  
@@ -17,8 +17,9 @@
 ## Project Description
  
 **Rebex** is an intelligent pharmaceutical inventory management system that uses **Deep Q-Network (DQN) Reinforcement Learning** to prevent essential medicine stockouts in Eritrean district hospital pharmacies.
- 
-District hospital pharmacies in Eritrea are the primary point of medicine access for large portions of the population, yet essential medicine availability sits at around 80% — meaning roughly 1 in 5 prescribed medicines is unavailable at the point of care. Traditional inventory control methods such as Economic Order Quantity (EOQ) and manual periodic reviews cannot adapt to the unpredictable demand patterns, seasonal disease surges, and supply chain disruptions common in low-resource healthcare environments.
+
+-
+District hospital pharmacies in Eritrea are the primary point of medicine access for large portions of the population, yet essential medicine availability sits at around 80% — meaning roughly 1 in 5 prescribed medicines is unavailable at the point of care. Traditional inventory control methods, such as Economic Order Quantity (EOQ) and manual periodic reviews, cannot adapt to the unpredictable demand patterns, seasonal disease surges, and supply chain disruptions common in low-resource healthcare environments.
 ---
  
 ## System Architecture
@@ -165,42 +166,6 @@ python rl/train.py --episodes 1000 --save-path models/dqn_agent.pt
 > Change all credentials before any real-world deployment.
  
 ---
- 
-## Project Structure
- 
-```
-rxguard-rl-pharmacy/
-├── api/                    # FastAPI backend
-│   ├── main.py
-│   ├── routes/
-│   │   ├── recommend.py    # /api/recommend endpoint
-│   │   └── orders.py
-│   └── models/             # SQLAlchemy ORM models
-├── dashboard/              # Streamlit frontend
-│   ├── app.py
-│   └── pages/
-│       ├── stock_count.py
-│       ├── recommendations.py
-│       └── reports.py
-├── rl/                     # Reinforcement learning core
-│   ├── environment.py      # Custom Gym environment
-│   ├── agent.py            # DQN agent
-│   ├── train.py            # Training script
-│   └── hmm_demand.py       # HMM demand regime model
-├── data/                   # Synthetic data generation
-│   └── generate_synthetic.py
-├── models/                 # Saved model weights
-├── notebooks/              # Jupyter notebooks (EDA, training)
-│   ├── 01_data_exploration.ipynb
-│   ├── 02_hmm_demand_modeling.ipynb
-│   └── 03_dqn_training_evaluation.ipynb
-├── docker-compose.yml
-├── Dockerfile
-├── requirements.txt
-├── .env.example
-└── README.md
-```
- 
 ---
  
 > Results will be updated as training progresses.
