@@ -43,7 +43,7 @@ District hospital pharmacies in Eritrea are the primary point of medicine access
 │   orders, recommendations)      │
 └─────────────────────────────────┘
 ```
- 
+ [[Watch the video: DEMO](https://canva.link/blscdff2ud0uisp)]
 ---
  
 ## Features
