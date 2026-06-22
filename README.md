@@ -13,13 +13,14 @@
 9. [Performance Metrics](#performance-metrics)
 10. [Challenges & Future Work](#challenges--future-work)
 ---
- 
+
+---
 ## Project Description
  
 **Rebex** is an intelligent pharmaceutical inventory management system that uses **Deep Q-Network (DQN) Reinforcement Learning** to prevent essential medicine stockouts in Eritrean district hospital pharmacies.
 
--
 District hospital pharmacies in Eritrea are the primary point of medicine access for large portions of the population, yet essential medicine availability sits at around 80% — meaning roughly 1 in 5 prescribed medicines is unavailable at the point of care. Traditional inventory control methods, such as Economic Order Quantity (EOQ) and manual periodic reviews, cannot adapt to the unpredictable demand patterns, seasonal disease surges, and supply chain disruptions common in low-resource healthcare environments.
+
 ---
  
 ## System Architecture
