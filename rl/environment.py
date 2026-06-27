@@ -26,12 +26,17 @@ hmm_demand.py so the demand/supply dynamics the agent trains against are
 the same ones validated in generate_synthetic.py.
 """
 
+import os
+import sys
 import numpy as np
 import gymnasium as gym
 from gymnasium import spaces
 
-from literature_params import HMM_REGIMES, LEAD_TIME_DAYS_ASSUM
-from hmm_demand import generate_regime_sequence, REGIME_NAMES, fit_hmm_to_demand, regime_belief_features
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, project_root)
+
+from data.literature_params import HMM_REGIMES, LEAD_TIME_DAYS_ASSUM
+from rl.hmm_demand import generate_regime_sequence, REGIME_NAMES, fit_hmm_to_demand, regime_belief_features
 
 
 class PharmacyInventoryEnv(gym.Env):

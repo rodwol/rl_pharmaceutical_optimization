@@ -16,9 +16,14 @@ Regime parameters are imported from literature_params.py so every number
 traces back to a cited source.
 """
  
+import os
+import sys
 import numpy as np
 from hmmlearn import hmm
-from literature_params import HMM_REGIMES, HMM_TRANSITION_MATRIX, HMM_INITIAL_STATE_PROBS
+from data.literature_params import HMM_REGIMES, HMM_TRANSITION_MATRIX, HMM_INITIAL_STATE_PROBS
+
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, project_root)
  
 REGIME_NAMES = ["stable", "surge", "disruption"]
 rng = np.random.default_rng(7)

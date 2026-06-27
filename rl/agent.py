@@ -12,8 +12,13 @@ Architecture (per proposal's "Model Architecture" requirement):
     Exploration  : epsilon-greedy, linearly annealed
 """
 
+import sys
+import os
 from stable_baselines3 import DQN
 from stable_baselines3.common.monitor import Monitor
+
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, project_root)
 
 from environment import PharmacyInventoryEnv
 

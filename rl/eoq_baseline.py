@@ -13,8 +13,13 @@ A reorder point R = average lead-time demand + safety stock determines
 WHEN to order; EOQ determines HOW MUCH to order each time.
 """
 
+import os
+import sys
 import numpy as np
 from environment import PharmacyInventoryEnv
+
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, project_root)
 
 
 def compute_eoq(annual_demand: float, ordering_cost: float = 15.0,
