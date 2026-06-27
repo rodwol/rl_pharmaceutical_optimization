@@ -1,21 +1,18 @@
 """
-
 Synthetic pharmacy inventory/demand generator for Eritrean district hospital
-pharmacies. Builds on the structure of the original prototype script but:
+pharmacies.
 
   1. Grounds the medicine list in the 2015 Eritrean National List of
      Medicines (ENLM) categories instead of an invented generic list.
   2. Replaces the single seasonal-multiplier demand process with an
-     HMM-driven regime-switching process (stable / surge / disruption),
-     addressing the supervisor's MDP+HMM comment directly.
-  3. Calibrates every operational parameter (stockout duration, stockout
-     incidence, procurement cycle, lead time) against literature_params.py,
-     with every number traceable to a cited source or flagged as an
-     explicit assumption.
+     HMM-driven state-switching process (stable / surge / disruption)
+  3. Calibrates every operational parameter: stockout duration, stockout
+     incidence, procurement cycle, lead time with every number traceable to 
+     a cited source or flagged as an explicit assumption.
   4. Runs a validation step at the end comparing simulated output statistics
-     against the literature targets, so the methodology section can state
-     quantitatively how well the simulation matches published benchmarks.
+     against the literature targets.
 """
+
 
 import sys
 import numpy as np
