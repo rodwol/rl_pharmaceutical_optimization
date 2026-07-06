@@ -1,8 +1,4 @@
 """
-api/main.py
-─────────────────────────────────────────────────────────────────────────
-RxGuard FastAPI backend.
-
 Endpoints:
   GET  /                      health check
   GET  /health                health check (explicit)
@@ -15,15 +11,11 @@ Endpoints:
   PATCH /api/orders/{id}/reject   reject a pending order
   GET  /api/inventory         current inventory snapshot (for dashboard)
   GET  /api/medicines         list of all tracked medicines
-
-Swagger UI: http://localhost:8000/docs
-ReDoc:      http://localhost:8000/redoc
 """
 
 import os
 import sys
 
-# ── Path setup so imports work when uvicorn runs from project root ─────────
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, project_root)
 
@@ -33,7 +25,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from api.routes import recommend, orders, inventory
 
 app = FastAPI(
-    title="RxGuard API",
+    title="Rebex",
     description=(
         "**Reinforcement-learning powered replenishment recommendation API** "
         "for essential medicine stockout prevention in Eritrean district hospital "
@@ -48,7 +40,7 @@ app = FastAPI(
     ),
     version="1.0.0",
     contact={
-        "name": "RxGuard Capstone Project",
+        "name": "Project R",
     },
     license_info={"name": "MIT"},
 )
@@ -72,7 +64,7 @@ app.include_router(inventory.router,  prefix="/api", tags=["Inventory"])
 def root():
     return {
         "status": "ok",
-        "service": "RxGuard API",
+        "service": "R API",
         "version": "1.0.0",
         "docs": "/docs",
         "redoc": "/redoc",
