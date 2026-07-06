@@ -1,76 +1,111 @@
+"""
+Run: streamlit run dashboard/app.py
+API: uvicorn api.main:app --reload --port 8000  (in a separate terminal)
+"""
+
 import streamlit as st
-from inventory_state import init_session_inventory, load_model
+import os, sys
+
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, project_root)
+
+from client import health_check, model_health, get_inventory
 
 st.set_page_config(
     page_title="Pharmacy Inventory",
-    page_icon="\U0001F48A",
     layout="wide",
     initial_sidebar_state="expanded",
 )
 
-# ── Minimal custom styling: calm clinical palette, clear hierarchy ──
 st.markdown("""
 <style>
-    .block-container { padding-top: 2rem; }
-    [data-testid="stMetricValue"] { font-size: 1.6rem; }
-    .risk-high { color: #C62828; font-weight: 600; }
-    .risk-medium { color: #EF6C00; font-weight: 600; }
-    .risk-low { color: #2E7D32; font-weight: 600; }
-    .stApp { background-color: #FAFBFC; }
+    .block-container { padding-top: 1.5rem; }
+    [data-testid="stMetricValue"] { font-size: 1.6rem; font-weight: 600; }
+    .risk-high   { color: #C62828; font-weight: 700; }
+    .risk-medium { color: #EF6C00; font-weight: 700; }
+    .risk-low    { color: #2E7D32; font-weight: 700; }
+    .api-online  { color: #2E7D32; font-weight: 600; }
+    .api-offline { color: #C62828; font-weight: 600; }
+    div[data-testid="stSidebarContent"] { background-color: #F5F7FA; }
 </style>
 """, unsafe_allow_html=True)
 
-init_session_inventory()
-model = load_model()
-
+# ── Sidebar ────────────────────────────────────────────────────────────────
 with st.sidebar:
-    st.markdown("## \U0001F48A")
-    st.caption("RL-powered medicine stockout prevention")
+    st.markdown("## Rebex")
+    st.caption("Inventory Support  Dashboard")
     st.divider()
 
-    role = st.radio(
-        "I am signed in as:",
-        ["Pharmacy Technician", "Pharmacy Manager"],
-        index=0,
-    )
+    role = st.radio("Signed in as:", ["Pharmacy Technician", "Pharmacy Manager"])
+    st.session_state["role"] = role
     st.divider()
 
-    if model is None:
-        st.warning("No trained model found at `models/dqn_agent.zip`. "
-                   "Recommendations will show a fallback message until a model is trained.")
+    # API status badge
+    api_status = health_check()
+    ml_status  = model_health()
+    if api_status.get("status") == "ok":
+        st.markdown("<span class='api-online'>● API online</span>", unsafe_allow_html=True)
     else:
-        st.success("DQN model loaded")
+        st.markdown("<span class='api-offline'>● API offline</span>", unsafe_allow_html=True)
+        st.caption("Start with: `uvicorn api.main:app --port 8000`")
 
-    st.caption("District Hospital Pharmacy — Eritrea (simulated)")
-    st.caption("Data: literature-calibrated synthetic dataset. See README for sources.")
+    if ml_status.get("dqn_model") == "loaded":
+        st.markdown("<span class='api-online'>● DQN model loaded</span>", unsafe_allow_html=True)
+    else:
+        st.markdown("<span class='api-offline'>● DQN model unavailable</span>",
+                    unsafe_allow_html=True)
 
-st.session_state["role"] = role
+    st.divider()
+    st.caption("District Hospital Pharmacy")
+    st.caption("Eritrea — simulated dataset")
+    st.caption("Literature-calibrated: Halibet 2018 [ERI],\nAsmara 2019 [ERI]")
 
+# Main content 
 st.title("Pharmacy Inventory Dashboard")
 st.caption(
-    "A reinforcement-learning decision-support tool for essential medicine "
-    "replenishment in district hospital pharmacies."
+    "Reinforcement-learning decision-support for essential medicine "
+    "replenishment in Eritrean district hospital pharmacies."
 )
 
-st.markdown("""
-Use the navigation in the left sidebar (**Pages**) to move between:
+# Live KPI metrics from API
+inventory = get_inventory()
+if inventory:
+    n_meds     = len(inventory)
+    n_high     = sum(1 for i in inventory if i["stockout_risk"] == "high")
+    n_medium   = sum(1 for i in inventory if i["stockout_risk"] == "medium")
+    n_low      = sum(1 for i in inventory if i["stockout_risk"] == "low")
+else:
+    n_meds = n_high = n_medium = n_low = 0
 
-- **Stock Count** — record today's stock and get an order recommendation
-- **Recommendations** — review and approve pending orders (Manager)
-- **Reports** — historical performance and DQN vs. EOQ comparison
+c1, c2, c3, c4 = st.columns(4)
+c1.metric("Medicines tracked",         n_meds)
+c2.metric(" High stockout risk",     n_high,   help="< 7 days of cover")
+c3.metric(" Medium stockout risk",   n_medium, help="7–14 days of cover")
+c4.metric(" Low stockout risk",      n_low,    help="> 14 days of cover")
 
-This is a preliminary MVP for the Initial Software Demo. All data shown is
-simulated; no real patient or hospital-identifying information is used.
+st.divider()
+
+# Navigation guide
+col_a, col_b = st.columns(2)
+with col_a:
+    st.markdown("""
+** Pharmacy Technician workflow**
+1. Go to **Stock Count** in the sidebar
+2. Select a medicine and enter today's count
+3. Click **Get Recommendation** — the DQN agent responds instantly
+4. Send the recommendation to your manager for approval
+""")
+with col_b:
+    st.markdown("""
+** Pharmacy Manager workflow**
+1. Go to **Recommendations** in the sidebar
+2. Review pending orders with risk level and days of cover
+3. Adjust quantity if needed, then Approve or Reject
+4. View performance trends in **Reports**
 """)
 
-col1, col2, col3 = st.columns(3)
-inv = st.session_state.inventory
-n_meds = len(inv)
-n_low_stock = sum(1 for v in inv.values() if v["stock_on_hand"] / max(v["base_daily_demand"], 1e-6) < 7)
-n_pending = len(st.session_state.pending_recommendations)
-
-col1.metric("Medicines tracked", n_meds)
-col2.metric("At high stockout risk", n_low_stock, help="Less than 7 days of cover remaining")
-col3.metric("Pending recommendations", n_pending)
-
-st.info("Go to **Stock Count** in the sidebar to begin recording today's inventory.")
+st.info(
+    "All data shown is simulated using a literature-calibrated synthetic dataset. "
+    "No real patient or hospital-identifying information is used. "
+    "Recommendations are decision-support only — all orders require manager approval."
+)

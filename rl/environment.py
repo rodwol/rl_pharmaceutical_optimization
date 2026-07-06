@@ -1,6 +1,4 @@
 """
-environment.py  —  RxGuard Pharmacy Inventory MDP
-─────────────────────────────────────────────────────────────────────────
 Enriched Gymnasium environment matching the validated synthetic dataset.
 
 Key improvements over the initial version:
@@ -49,10 +47,10 @@ import gymnasium as gym
 from gymnasium import spaces
 from datetime import date, timedelta
 
-from hmm_demand import RegimeBeliefInferrer, HMM_CACHE_PATH
-
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, project_root)
+
+from rl.hmm_demand import RegimeBeliefInferrer, HMM_CACHE_PATH
 
 # ─────────────────────────────────────────────────────────────────────────
 # SEASONAL MULTIPLIERS — extracted directly from the validated dataset
@@ -124,10 +122,6 @@ AVAILABILITY_REWARD           = 1.0     # per full day
 
 class PharmacyInventoryEnv(gym.Env):
     """
-    Single-medicine daily inventory replenishment MDP.
-
-    Parameters
-    ----------
     medication_id : str
         ENLM medicine ID (M001-M015). Determines base demand,
         category, and seasonal profile.

@@ -1,13 +1,9 @@
 """
-train.py  —  RxGuard full training pipeline
-─────────────────────────────────────────────────────────────────────────
-Pipeline:
-  1. Load & validate synthetic_demand_data.csv
-  2. Pre-train HMM once on the dataset (or load cached)
-  3. Inject frozen HMM inferrer into environment
-  4. Train DQN across multiple medicines (randomised per episode)
-  5. Evaluate DQN vs. EOQ baseline
-  6. Report metrics
+  - Load & validate synthetic_demand_data.csv
+  - pre-train HMM once on the dataset (or load cached)
+  - load the frozen HMM inferrer into environment
+  - train DQN across multiple medicines
+  - evaluate DQN vs. EOQ baseline
 """
 
 import argparse, os, numpy as np, pandas as pd, sys
@@ -23,7 +19,7 @@ from hmm_demand import pretrain_hmm, RegimeBeliefInferrer, HMM_CACHE_PATH
 from environment import PharmacyInventoryEnv, BASE_DEMAND, HOLDING_COST_PER_UNIT_PER_DAY
 
 
-# ── EOQ Baseline (updated to include holding cost matching env) ───────────
+# EOQ Baseline 
 
 def compute_eoq(annual_demand, ordering_cost=2.0,
                 holding_cost_per_unit_per_year=None):
