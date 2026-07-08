@@ -48,9 +48,15 @@ from gymnasium import spaces
 from datetime import date, timedelta
 
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, project_root)
+module_dir = os.path.dirname(os.path.abspath(__file__))
+for path in (project_root, module_dir):
+    if path not in sys.path:
+        sys.path.insert(0, path)
 
-from hmm_demand import RegimeBeliefInferrer, HMM_CACHE_PATH
+try:
+    from .hmm_demand import RegimeBeliefInferrer, HMM_CACHE_PATH
+except ImportError:  # pragma: no cover - fallback for direct script execution
+    from hmm_demand import RegimeBeliefInferrer, HMM_CACHE_PATH
 
 # ─────────────────────────────────────────────────────────────────────────
 # SEASONAL MULTIPLIERS — extracted directly from the validated dataset

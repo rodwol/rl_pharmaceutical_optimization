@@ -10,7 +10,7 @@ for _p in [_dashboard_dir, _project_root]:
         sys.path.insert(0, _p)
 
 import streamlit as st
-from api_client import health_check, model_health, get_inventory
+from client import health_check, model_health, get_inventory
 
 st.set_page_config(
     page_title="Pharmacy Inventory",

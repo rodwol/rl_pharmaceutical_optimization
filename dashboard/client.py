@@ -3,7 +3,7 @@ import requests
 import streamlit as st
 from typing import Optional
 
-API_BASE = os.getenv("Rebex_API_URL", "http://localhost:8000")
+API_BASE = os.getenv("Rebex_API_URL", "https://rl-pharmaceutical-optimization.onrender.com")
 TIMEOUT  = 5   # seconds
 
 

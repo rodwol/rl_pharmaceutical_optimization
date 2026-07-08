@@ -14,7 +14,7 @@ import sys, os, datetime
 import streamlit as st
 
 
-import api_client as api
+import client as api
 
 st.set_page_config(page_title="Stock Count | Rebex", layout="wide")
 

@@ -21,7 +21,7 @@ sys.path.insert(0, project_root)
 
 router = APIRouter()
 
-# ── Lazy singletons (loaded once on first request) ────────────────────────
+# Lazy singletons (loaded once on first request)
 
 @lru_cache(maxsize=1)
 def _get_model():
@@ -59,7 +59,7 @@ def _get_inferrer():
         return None   # falls back to prior [0.8, 0.15, 0.05]
 
 
-# ── Constants ─────────────────────────────────────────────────────────────
+# Constants
 
 ACTION_LABELS = {
     0: "No order needed",
@@ -76,7 +76,7 @@ ACTION_URGENCY = {
 }
 
 
-# ── Pydantic schemas ──────────────────────────────────────────────────────
+# Pydantic schemas
 
 class InventoryStateRequest(BaseModel):
     medication_id: str = Field(..., example="M003",
@@ -136,7 +136,7 @@ class RecommendationResponse(BaseModel):
     )
 
 
-# ── Helpers ───────────────────────────────────────────────────────────────
+# Helpers
 
 def _build_observation(req: InventoryStateRequest,
                         belief: np.ndarray) -> np.ndarray:
@@ -160,7 +160,7 @@ def _stockout_risk(days_cover: float) -> str:
     return "low"
 
 
-# ── Endpoints ─────────────────────────────────────────────────────────────
+# Endpoints 
 
 @router.post(
     "/recommend",

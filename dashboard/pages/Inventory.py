@@ -9,7 +9,7 @@ project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, project_root)
 
 from stable_baselines3 import DQN
-from environment import PharmacyInventoryEnv
+from rl.environment import PharmacyInventoryEnv
 
 MODEL_PATH = os.path.join(os.path.dirname(__file__), "..", "models", "dqn_agent.zip")
 MEDS_PATH = os.path.join(os.path.dirname(__file__), "..", "medications.csv")
