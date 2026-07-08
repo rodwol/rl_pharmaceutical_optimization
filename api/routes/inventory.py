@@ -64,7 +64,7 @@ _INVENTORY = {
 }
 
 
-# ── Schemas ───────────────────────────────────────────────────────────────
+#Schemas
 
 class MedicineInfo(BaseModel):
     medication_id: str
@@ -115,7 +115,7 @@ def _build_item(mid: str) -> InventoryItem:
     )
 
 
-# ── Endpoints ─────────────────────────────────────────────────────────────
+# Endpoints 
 
 @router.get(
     "/medicines",

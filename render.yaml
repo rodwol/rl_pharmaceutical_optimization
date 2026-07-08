@@ -1,0 +1,30 @@
+services:
+
+  # ── FastAPI Backend 
+  - type: web
+    name: rxguard-api
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn api.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+    healthCheckPath: /health
+
+  # ── Streamlit Dashboard
+  - type: web
+    name: rxguard-dashboard
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: >
+      streamlit run dashboard/Home.py
+      --server.port $PORT
+      --server.address 0.0.0.0
+      --server.headless true
+      --server.enableCORS false
+      --server.enableXsrfProtection false
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: RXGUARD_API_URL
+        value: https://Rebex-api.onrender.com

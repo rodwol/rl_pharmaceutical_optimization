@@ -1,4 +1,23 @@
-pip freeze
-streamlit==1.30.0
-pandas==2.0.3
-plotly==5.15.0
+freeze
+numpy>=1.26
+pandas>=2.2
+torch>=2.2
+stable-baselines3>=2.3
+gymnasium>=0.29
+hmmlearn>=0.3
+fastapi>=0.110
+uvicorn[standard]>=0.29
+pydantic>=2.0
+python-multipart>=0.0.9
+streamlit>=1.35
+plotly>=5.20
+requests>=2.31
+matplotlib>=3.8
+seaborn>=0.13
+scikit-learn>=1.4
+sqlalchemy>=2.0
+psycopg2-binary>=2.9
+python-dotenv>=1.0
+jupyter>=1.0
+nbformat>=5.10
+nbconvert>=7.0

@@ -50,7 +50,7 @@ from datetime import date, timedelta
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, project_root)
 
-from rl.hmm_demand import RegimeBeliefInferrer, HMM_CACHE_PATH
+from hmm_demand import RegimeBeliefInferrer, HMM_CACHE_PATH
 
 # ─────────────────────────────────────────────────────────────────────────
 # SEASONAL MULTIPLIERS — extracted directly from the validated dataset

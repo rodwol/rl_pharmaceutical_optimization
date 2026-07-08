@@ -17,12 +17,12 @@ from pydantic import BaseModel, Field
 
 router = APIRouter()
 
-# ── In-memory store (MVP) ─────────────────────────────────────────────────
+# In-memory store (MVP) 
 _store: List[dict] = []
 _next_id: int = 1
 
 
-# ── Schemas ───────────────────────────────────────────────────────────────
+# Schemas
 
 class OrderSubmitRequest(BaseModel):
     medication_id: str      = Field(..., example="M003")
@@ -73,7 +73,7 @@ class ApproveRequest(BaseModel):
                     "omit to keep DQN-recommended quantity")
 
 
-# ── Helpers ───────────────────────────────────────────────────────────────
+# Helpers
 
 def _find(order_id: int) -> dict:
     for o in _store:
@@ -82,7 +82,7 @@ def _find(order_id: int) -> dict:
     raise HTTPException(status_code=404, detail=f"Order {order_id} not found")
 
 
-# ── Endpoints ─────────────────────────────────────────────────────────────
+# Endpoints
 
 @router.post(
     "/orders",

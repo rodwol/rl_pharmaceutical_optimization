@@ -1,15 +1,16 @@
 """
-Run: streamlit run dashboard/app.py
-API: uvicorn api.main:app --reload --port 8000  (in a separate terminal)
+Run: streamlit run dashboard/Home.py
 """
 
+import sys, os
+_dashboard_dir = os.path.dirname(os.path.abspath(__file__))
+_project_root  = os.path.dirname(_dashboard_dir)
+for _p in [_dashboard_dir, _project_root]:
+    if _p not in sys.path:
+        sys.path.insert(0, _p)
+
 import streamlit as st
-import os, sys
-
-project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, project_root)
-
-from client import health_check, model_health, get_inventory
+from api_client import health_check, model_health, get_inventory
 
 st.set_page_config(
     page_title="Pharmacy Inventory",
@@ -33,7 +34,7 @@ st.markdown("""
 # ── Sidebar ────────────────────────────────────────────────────────────────
 with st.sidebar:
     st.markdown("## Rebex")
-    st.caption("Inventory Support  Dashboard")
+    st.caption("RL-powered medicine stockout prevention")
     st.divider()
 
     role = st.radio("Signed in as:", ["Pharmacy Technician", "Pharmacy Manager"])
@@ -60,7 +61,7 @@ with st.sidebar:
     st.caption("Eritrea — simulated dataset")
     st.caption("Literature-calibrated: Halibet 2018 [ERI],\nAsmara 2019 [ERI]")
 
-# Main content 
+# ── Main content ───────────────────────────────────────────────────────────
 st.title("Pharmacy Inventory Dashboard")
 st.caption(
     "Reinforcement-learning decision-support for essential medicine "
@@ -79,9 +80,9 @@ else:
 
 c1, c2, c3, c4 = st.columns(4)
 c1.metric("Medicines tracked",         n_meds)
-c2.metric(" High stockout risk",     n_high,   help="< 7 days of cover")
-c3.metric(" Medium stockout risk",   n_medium, help="7–14 days of cover")
-c4.metric(" Low stockout risk",      n_low,    help="> 14 days of cover")
+c2.metric("High stockout risk",     n_high,   help="< 7 days of cover")
+c3.metric("Medium stockout risk",   n_medium, help="7–14 days of cover")
+c4.metric("Low stockout risk",      n_low,    help="> 14 days of cover")
 
 st.divider()
 
@@ -89,7 +90,7 @@ st.divider()
 col_a, col_b = st.columns(2)
 with col_a:
     st.markdown("""
-** Pharmacy Technician workflow**
+Pharmacy Technician workflow
 1. Go to **Stock Count** in the sidebar
 2. Select a medicine and enter today's count
 3. Click **Get Recommendation** — the DQN agent responds instantly
@@ -97,7 +98,7 @@ with col_a:
 """)
 with col_b:
     st.markdown("""
-** Pharmacy Manager workflow**
+Pharmacy Manager
 1. Go to **Recommendations** in the sidebar
 2. Review pending orders with risk level and days of cover
 3. Adjust quantity if needed, then Approve or Reject

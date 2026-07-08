@@ -9,16 +9,16 @@ project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, project_root)
 
 from stable_baselines3 import DQN
-from rl.environment import PharmacyInventoryEnv
+from environment import PharmacyInventoryEnv
 
 MODEL_PATH = os.path.join(os.path.dirname(__file__), "..", "models", "dqn_agent.zip")
 MEDS_PATH = os.path.join(os.path.dirname(__file__), "..", "medications.csv")
 
 ACTION_LABELS = {
     0: "No order needed",
-    1: "Order SMALL batch (~7 days supply)",
-    2: "Order MEDIUM batch (~21 days supply)",
-    3: "Order LARGE batch (~45 days supply)",
+    1: "Order SMALL batch (~14 days supply)",
+    2: "Order MEDIUM batch (~30 days supply)",
+    3: "Order LARGE batch (~60 days supply)",
 }
 
 ACTION_RISK_COLOR = {0: "#2E7D32", 1: "#F9A825", 2: "#EF6C00", 3: "#C62828"}

@@ -54,7 +54,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ── Routers ───────────────────────────────────────────────────────────────
+# Routers 
 app.include_router(recommend.router,  prefix="/api", tags=["Recommendations"])
 app.include_router(orders.router,     prefix="/api", tags=["Orders"])
 app.include_router(inventory.router,  prefix="/api", tags=["Inventory"])
