@@ -8,17 +8,26 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, project_root)
 
-from stable_baselines3 import DQN
-from rl.environment import PharmacyInventoryEnv
+try:
+    from stable_baselines3 import DQN
+except ImportError:  # pragma: no cover - optional dependency
+    DQN = None
+
+try:
+    from rl.environment import PharmacyInventoryEnv  # noqa: F401
+except Exception:  # pragma: no cover - optional dependency
+    PharmacyInventoryEnv = None
 
 MODEL_PATH = os.path.join(os.path.dirname(__file__), "..", "models", "dqn_agent.zip")
-MEDS_PATH = os.path.join(os.path.dirname(__file__), "..", "medications.csv")
+MEDS_PATH = os.path.join(project_root, "data", "medications.csv")
+if not os.path.exists(MEDS_PATH):
+    MEDS_PATH = os.path.join(project_root, "medications.csv")
 
 ACTION_LABELS = {
     0: "No order needed",
-    1: "Order SMALL batch (~14 days supply)",
-    2: "Order MEDIUM batch (~30 days supply)",
-    3: "Order LARGE batch (~60 days supply)",
+    1: "Order SMALL batch (~7 days supply)",
+    2: "Order MEDIUM batch (~21 days supply)",
+    3: "Order LARGE batch (~45 days supply)",
 }
 
 ACTION_RISK_COLOR = {0: "#2E7D32", 1: "#F9A825", 2: "#EF6C00", 3: "#C62828"}
@@ -26,6 +35,8 @@ ACTION_RISK_COLOR = {0: "#2E7D32", 1: "#F9A825", 2: "#EF6C00", 3: "#C62828"}
 
 @st.cache_resource
 def load_model():
+    if DQN is None:
+        return None
     if os.path.exists(MODEL_PATH):
         return DQN.load(MODEL_PATH)
     return None
@@ -121,3 +132,49 @@ def get_recommendation(item: dict, model) -> dict:
         "risk": risk,
         "days_of_cover": round(days_of_cover, 1),
     }
+
+
+def render_inventory_page():
+    st.set_page_config(page_title="Inventory | Rebex", layout="wide")
+    st.title("Inventory Overview")
+    st.caption("Current stock position and replenishment context for the simulated pharmacy inventory.")
+
+    init_session_inventory()
+    inventory = st.session_state.inventory
+
+    if not inventory:
+        st.info("No inventory data is available yet.")
+        return
+
+    rows = []
+    for medication_id, item in inventory.items():
+        days_of_cover = item["stock_on_hand"] / max(item["base_daily_demand"], 1e-6)
+        if days_of_cover < 7:
+            risk = "high"
+        elif days_of_cover < 14:
+            risk = "medium"
+        else:
+            risk = "low"
+        rows.append({
+            "Medication ID": medication_id,
+            "Name": item["name"],
+            "Category": item["category"],
+            "Stock on hand": int(item["stock_on_hand"]),
+            "Base daily demand": round(item["base_daily_demand"], 1),
+            "Days of cover": round(days_of_cover, 1),
+            "Risk": risk.upper(),
+            "Pending qty": int(item.get("pending_qty", 0)),
+            "Days to expiry": int(item.get("days_to_expiry", 0)),
+        })
+
+    df = pd.DataFrame(rows)
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("Medicines tracked", len(df))
+    c2.metric("High risk", int((df["Risk"] == "HIGH").sum()))
+    c3.metric("Medium risk", int((df["Risk"] == "MEDIUM").sum()))
+    c4.metric("Low risk", int((df["Risk"] == "LOW").sum()))
+
+    st.dataframe(df, use_container_width=True, hide_index=True)
+
+
+render_inventory_page()

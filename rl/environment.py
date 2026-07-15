@@ -58,6 +58,21 @@ try:
 except ImportError:  # pragma: no cover - fallback for direct script execution
     from hmm_demand import RegimeBeliefInferrer, HMM_CACHE_PATH
 
+try:
+    from data.literature_params import (
+        LEAD_TIME_DAYS_ASSUM,
+        ORDER_QUANTITY_DAYS_ASSUM,
+        HMM_REGIMES,
+        PROCUREMENT_CYCLE_DAYS_PROXY,
+    )
+except ImportError:  # pragma: no cover - fallback for direct script execution
+    from literature_params import (
+        LEAD_TIME_DAYS_ASSUM,
+        ORDER_QUANTITY_DAYS_ASSUM,
+        HMM_REGIMES,
+        PROCUREMENT_CYCLE_DAYS_PROXY,
+    )
+
 # ─────────────────────────────────────────────────────────────────────────
 # SEASONAL MULTIPLIERS — extracted directly from the validated dataset
 # (generate_synthetic.py, confirmed in validation Section 5)
@@ -75,14 +90,20 @@ SEASONAL_PROFILES = {
 # Day-of-week multipliers (0=Mon … 6=Sun), extracted from dataset
 DOW_FACTORS = [0.9957, 1.0097, 0.9921, 1.0052, 0.9974, 0.5398, 0.2977]
 
-# Regime demand multipliers, extracted from dataset
-REGIME_DEMAND_MULT = {"stable": 1.000, "surge": 1.802, "disruption": 0.980}
+# Regime parameters are kept in sync with the literature-parameter source of truth.
+REGIME_DEMAND_MULT = {
+    regime: params["demand_multiplier"] for regime, params in HMM_REGIMES.items()
+}
 
 # Lead-time multipliers by regime (from literature_params.py [ASSUM])
-REGIME_LEAD_MULT = {"stable": 1.0, "surge": 1.1, "disruption": 4.0}
+REGIME_LEAD_MULT = {
+    regime: params["lead_time_multiplier"] for regime, params in HMM_REGIMES.items()
+}
 
 # Supplier stockout probability by regime (from literature_params.py)
-REGIME_SUPPLIER_SO = {"stable": 0.018, "surge": 0.058, "disruption": 0.353}
+REGIME_SUPPLIER_SO = {
+    regime: params["stockout_prob_daily"] for regime, params in HMM_REGIMES.items()
+}
 
 # Base daily demand per medicine (stable regime, weekday average)
 # Extracted directly from the validated synthetic dataset
@@ -116,7 +137,18 @@ MED_CATEGORY = {
 REGIME_NAMES = ["stable", "surge", "disruption"]
 
 # Lead time distribution parameters [ASSUM] — triangular
-LT_MIN, LT_MODE, LT_MAX = 14, 30, 60
+LT_MIN, LT_MODE, LT_MAX = (
+    LEAD_TIME_DAYS_ASSUM["min"],
+    LEAD_TIME_DAYS_ASSUM["mode"],
+    LEAD_TIME_DAYS_ASSUM["max"],
+)
+
+# Discrete action quantities (days of base demand covered by each bucket)
+Q_DAYS = {
+    "min": ORDER_QUANTITY_DAYS_ASSUM["min"],
+    "mid": ORDER_QUANTITY_DAYS_ASSUM["mid"],
+    "max": ORDER_QUANTITY_DAYS_ASSUM["max"],
+}
 
 # Economic parameters
 HOLDING_COST_PER_UNIT_PER_DAY = 0.005   # h
@@ -161,11 +193,12 @@ class PharmacyInventoryEnv(gym.Env):
         self.shelf_life_days = shelf_life_days
         self._seed = seed
         self._hmm_inferrer = hmm_inferrer
+        self.procurement_cycle_days_proxy = PROCUREMENT_CYCLE_DAYS_PROXY["mode"]
 
         # Action space: 4 discrete order sizes
-        self.q_min = self.base_daily_demand * 14
-        self.q_mid = self.base_daily_demand * 30
-        self.q_max = self.base_daily_demand * 60
+        self.q_min = self.base_daily_demand * Q_DAYS["min"]
+        self.q_mid = self.base_daily_demand * Q_DAYS["mid"]
+        self.q_max = self.base_daily_demand * Q_DAYS["max"]
 
         self.action_space = spaces.Discrete(4)
         self.observation_space = spaces.Box(
@@ -384,6 +417,7 @@ class PharmacyInventoryEnv(gym.Env):
             "ordering_cost": ordering_cost,
             "holding_cost": HOLDING_COST_PER_UNIT_PER_DAY * self.stock_on_hand,
             "regime_belief": self._get_belief().tolist(),
+            "procurement_cycle_days_proxy": self.procurement_cycle_days_proxy,
         }
         return (
             self._get_obs(), reward, False,

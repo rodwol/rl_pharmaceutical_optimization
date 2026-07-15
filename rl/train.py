@@ -9,7 +9,10 @@
 import argparse, os, numpy as np, pandas as pd, sys
 from stable_baselines3 import DQN
 from stable_baselines3.common.monitor import Monitor
-from stable_baselines3.common.callbacks import CheckpointCallback
+from stable_baselines3.common.callbacks import (
+    BaseCallback,
+    CheckpointCallback
+)
 from gymnasium import Env
 
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -186,6 +189,24 @@ class MultiMedEnv(Env):
 
     def render(self): self._env.render()
 
+class TrainingLogger(BaseCallback):
+    """
+    Records episode rewards during DQN training.
+    """
+
+    def __init__(self):
+        super().__init__()
+        self.episode_rewards = []
+
+    def _on_step(self):
+
+        infos = self.locals.get("infos", [])
+
+        for info in infos:
+            if "episode" in info:
+                self.episode_rewards.append(info["episode"]["r"])
+
+        return True
 
 # ── Main ─────────────────────────────────────────────────────────────────
 
@@ -237,6 +258,7 @@ def main():
         exploration_final_eps=0.08,
         policy_kwargs=dict(net_arch=[128, 128]),
         verbose=1,
+        tensorboard_log="./tensorboard/"
     )
 
     checkpoint_cb = CheckpointCallback(
@@ -244,12 +266,25 @@ def main():
         save_path=os.path.dirname(args.save_path),
         name_prefix="dqn_ckpt",
     )
+    training_logger = TrainingLogger()
+    
     print(f"Training DQN: {args.episodes} episodes "
           f"({total_timesteps:,} timesteps, multi-medicine)...")
     model.learn(total_timesteps=total_timesteps,
-                progress_bar=False, callback=checkpoint_cb)
+                progress_bar=False, callback=[checkpoint_cb, training_logger])
     model.save(args.save_path)
     print(f"\nModel saved → {args.save_path}")
+
+    os.makedirs("results", exist_ok=True)
+    reward_df = pd.DataFrame({
+        "Episode": np.arange(1, len(training_logger.episode_rewards)+1),
+        "Reward": training_logger.episode_rewards
+        })
+    reward_df.to_csv(
+        "results/training_rewards.csv",
+        index=False
+        )
+    print("Training rewards saved.")
 
     # Step 5: Evaluate
     print("\nEvaluating across all 15 medicines (3 seeds each)...")

@@ -1,51 +1,51 @@
 """
 Accepts current inventory state for a single medicine, builds the 8-dim
 observation vector matching environment.py, runs the frozen DQN model,
-and returns the recommended order action with full transparency
-(observation vector included in response for auditability).
-
-The HMM inferrer is loaded once at startup and shared across requests.
+and returns the recommended order action with full transparency.
 """
 
 import os
 import sys
 import numpy as np
-from functools import lru_cache
+from datetime import datetime
 from typing import List, Optional
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel, Field
+from sqlalchemy.orm import Session
 
 project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, project_root)
 
+from api.models.database import get_db, RecommendationLog
+
 router = APIRouter()
 
-# Lazy singletons (loaded once on first request)
+# ── Module-level state, populated once by load_models() at app startup ────
+_state = {"model": None, "inferrer": None, "load_error": None}
 
-@lru_cache(maxsize=1)
-def _get_model():
+
+def load_models():
+    """
+    Called once from api/main.py's @app.on_event("startup") handler.
+    Loads the DQN model and HMM inferrer into module-level state so every
+    request handler can access them instantly without any import or I/O cost.
+    """
     try:
         from stable_baselines3 import DQN
-        # Check rl/models/ first (local dev), then root models/ (Docker/CI)
-        for candidate in [
+        candidates = [
             os.path.join(project_root, "rl", "models", "dqn_agent.zip"),
             os.path.join(project_root, "models", "dqn_agent.zip"),
-        ]:
-            if os.path.exists(candidate):
-                path = candidate
-                break
-        else:
-            path = ""
-        if not os.path.exists(path):
-            raise FileNotFoundError(f"Model not found. Run rl/train.py first.")
-        return DQN.load(path)
+        ]
+        path = next((p for p in candidates if os.path.exists(p)), None)
+        if path is None:
+            raise FileNotFoundError(
+                "Model not found in rl/models/ or models/. Run rl/train.py first."
+            )
+        _state["model"] = DQN.load(path)
     except Exception as e:
-        raise HTTPException(status_code=503, detail=f"Model unavailable: {e}")
+        _state["load_error"] = f"DQN model unavailable: {e}"
 
-
-@lru_cache(maxsize=1)
-def _get_inferrer():
     try:
         sys.path.insert(0, os.path.join(project_root, "rl"))
         from hmm_demand import RegimeBeliefInferrer
@@ -54,18 +54,31 @@ def _get_inferrer():
             os.path.join(project_root, "models", "pretrained_hmm.pkl"),
         ]
         hmm_path = next((p for p in hmm_candidates if os.path.exists(p)), hmm_candidates[0])
-        return RegimeBeliefInferrer(load_path=hmm_path)
+        _state["inferrer"] = RegimeBeliefInferrer(load_path=hmm_path)
     except Exception:
-        return None   # falls back to prior [0.8, 0.15, 0.05]
+        _state["inferrer"] = None   # falls back to prior [0.8, 0.15, 0.05]
+
+
+def _get_model():
+    if _state["model"] is None:
+        raise HTTPException(
+            status_code=503,
+            detail=_state["load_error"] or "Model not loaded yet.",
+        )
+    return _state["model"]
+
+
+def _get_inferrer():
+    return _state["inferrer"]
 
 
 # Constants
 
 ACTION_LABELS = {
     0: "No order needed",
-    1: "Order SMALL batch (~14 days supply)",
-    2: "Order MEDIUM batch (~30 days supply)",
-    3: "Order LARGE batch (~60 days supply)",
+    1: "Order SMALL batch (~7 days supply)",
+    2: "Order MEDIUM batch (~21 days supply)",
+    3: "Order LARGE batch (~45 days supply)",
 }
 
 ACTION_URGENCY = {
@@ -76,8 +89,7 @@ ACTION_URGENCY = {
 }
 
 
-# Pydantic schemas
-
+# Pydantic schemas 
 class InventoryStateRequest(BaseModel):
     medication_id: str = Field(..., example="M003",
         description="ENLM medicine ID (M001–M015)")
@@ -136,7 +148,7 @@ class RecommendationResponse(BaseModel):
     )
 
 
-# Helpers
+# ── Helpers ───────────────────────────────────────────────────────────────
 
 def _build_observation(req: InventoryStateRequest,
                         belief: np.ndarray) -> np.ndarray:
@@ -155,12 +167,12 @@ def _build_observation(req: InventoryStateRequest,
 
 
 def _stockout_risk(days_cover: float) -> str:
-    if days_cover < 7:   return "high"
-    if days_cover < 14:  return "medium"
+    if days_cover < 14:   return "high"
+    if days_cover < 30:  return "medium"
     return "low"
 
 
-# Endpoints 
+# ── Endpoints ─────────────────────────────────────────────────────────────
 
 @router.post(
     "/recommend",
@@ -168,18 +180,15 @@ def _stockout_risk(days_cover: float) -> str:
     summary="Get DQN replenishment recommendation",
     description=(
         "Accepts the current inventory state for a single medicine and returns "
-        "a DQN-generated replenishment recommendation.\n\n"
+        "recommendation.\n\n"
         "The recommendation is generated by a Deep Q-Network agent trained on a "
         "literature-calibrated synthetic dataset of Eritrean district hospital "
-        "pharmacy demand patterns. A Hidden Markov Model (fitted on the same "
-        "dataset) infers the current demand regime (stable / surge / disruption) "
-        "from recent demand history and includes this as part of the agent's "
-        "state vector.\n\n"
+        "pharmacy demand patterns. "
         "**All recommendations require Pharmacy Manager approval before "
         "submission to the district medical store.**"
     ),
 )
-def recommend(req: InventoryStateRequest):
+def recommend(req: InventoryStateRequest, db: Session = Depends(get_db)):
     model    = _get_model()
     inferrer = _get_inferrer()
 
@@ -195,11 +204,28 @@ def recommend(req: InventoryStateRequest):
 
     # Order quantity — matches environment.py action map
     base      = req.base_daily_demand
-    qty_map   = {0: 0.0, 1: base * 14, 2: base * 30, 3: base * 60}
+    qty_map   = {0: 0.0, 1: base * 7, 2: base * 21, 3: base * 45}
     order_qty = round(qty_map[action])
 
     days_cover          = req.stock_on_hand / max(base, 1e-6)
     days_cover_pipeline = (req.stock_on_hand + req.pending_order_qty) / max(base, 1e-6)
+
+    # Log the recommendation for audit/analysis (production DB persistence)
+    try:
+        db.add(RecommendationLog(
+            medication_id=req.medication_id,
+            action=action,
+            recommended_qty=order_qty,
+            stockout_risk=_stockout_risk(days_cover_pipeline),
+            days_of_cover=round(days_cover, 1),
+            regime_belief_stable=float(belief[0]),
+            regime_belief_surge=float(belief[1]),
+            regime_belief_disruption=float(belief[2]),
+            created_at=datetime.utcnow(),
+        ))
+        db.commit()
+    except Exception:
+        db.rollback()   # logging failure should never break the recommendation
 
     return RecommendationResponse(
         medication_id=req.medication_id,

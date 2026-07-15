@@ -1,19 +1,35 @@
+# render.yaml
+# Defines all three RxGuard services for one-click Render deployment,
+# including a managed PostgreSQL database.
+#
+# Deploy: Render dashboard -> New -> Blueprint -> connect this repo.
+
+databases:
+  - name: rebex-db
+    databaseName: rebex_db
+    user: rxguard
+    plan: free
+
 services:
 
-  # ── FastAPI Backend 
+  # ── FastAPI Backend ──────────────────────────────────────────────────────
   - type: web
-    name: rxguard-api
+    name: rebex-api
     runtime: python
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn api.main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
+      - key: DATABASE_URL
+        fromDatabase:
+          name: rebex-db
+          property: connectionString
     healthCheckPath: /health
 
-  # ── Streamlit Dashboard
+  # Streamlit Dashboard 
   - type: web
-    name: rxguard-dashboard
+    name: dashboard
     runtime: python
     buildCommand: pip install -r requirements.txt
     startCommand: >
@@ -26,5 +42,5 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
-      - key: RXGUARD_API_URL
-        value: https://Rebex-api.onrender.com
+      - key: REBEX_API_URL
+        value: https://rl-pharmaceutical-optimization.onrender.com

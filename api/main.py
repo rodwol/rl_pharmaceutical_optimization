@@ -23,6 +23,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from api.routes import recommend, orders, inventory
+from api.models.database import init_db, seed_medicines, SessionLocal
 
 app = FastAPI(
     title="Rebex",
@@ -59,6 +60,22 @@ app.include_router(recommend.router,  prefix="/api", tags=["Recommendations"])
 app.include_router(orders.router,     prefix="/api", tags=["Orders"])
 app.include_router(inventory.router,  prefix="/api", tags=["Inventory"])
 
+@app.on_event("startup")
+def on_startup():
+    """
+      1. Create DB tables if they don't exist
+      2. Seed the medicine catalogue and initial inventory
+      3. Load the DQN model and HMM inferrer into memory
+
+    """
+    init_db()
+    db = SessionLocal()
+    try:
+        seed_medicines(db)
+    finally:
+        db.close()
+ 
+    recommend.load_models()
 
 @app.get("/", tags=["Health"], summary="Root health check")
 def root():

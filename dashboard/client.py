@@ -3,7 +3,7 @@ import requests
 import streamlit as st
 from typing import Optional
 
-API_BASE = os.getenv("Rebex_API_URL", "https://rl-pharmaceutical-optimization.onrender.com")
+API_BASE = os.getenv("REBEX_API_URL", "http://localhost:8000")
 TIMEOUT  = 5   # seconds
 
 
@@ -122,4 +122,3 @@ def approve_order(order_id: int, approved_by: str = "manager_demo",
 
 def reject_order(order_id: int, approved_by: str = "manager_demo") -> Optional[dict]:
     return _patch(f"/api/orders/{order_id}/reject", {"approved_by": approved_by})
-

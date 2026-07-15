@@ -60,7 +60,7 @@ STOCKOUT_DURATION = {
 STOCKOUT_INCIDENCE = {
     "point_in_time_stockout_rate_ERI": 0.125,      # [ERI] Halibet 2018 (antibiotics)
     "six_month_incidence_rate_PROXY": 0.60,        # [PROXY] Motta 2022 (any stockout in 6mo)
-    "referral_hospital_availability_ERI": 0.50,    # [ERI] PLOS ONE 2022 (>50% available)
+    "referral_hospital_availability_ERI": 0.50,    # [ERI] PLOS ONE 2022 (>50% available); used as a rough proxy for ~50% unavailability, not an exact point estimate.
 }
  
 # ─────────────────────────────────────────────────────────────────────────
@@ -82,7 +82,15 @@ LEAD_TIME_DAYS_ASSUM = {
             "delivery-delay component within the Gubre 2025 procurement cycle window. "
             "Disclosed explicitly as a limitation in methodology.",
 }
- 
+
+# Order-quantity buckets used by the RL action space and the recommendation UI.
+ORDER_QUANTITY_DAYS_ASSUM = {
+    "min": 7,
+    "mid": 21,
+    "max": 45,
+    "note": "[ASSUM] Discrete actions map to roughly 7/21/45 days of base demand.",
+}
+
 # ─────────────────────────────────────────────────────────────────────────
 # 5. DEMAND ESTIMATION METHOD
 # ─────────────────────────────────────────────────────────────────────────
