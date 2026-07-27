@@ -50,8 +50,7 @@ with col_left:
 
     # Status badge
     risk = inv_item["stockout_risk"]
-    risk_color = {"high": "🔴", "medium": "🟠", "low": "🟢"}.get(risk, "⚪")
-    st.markdown(f"{risk_color} **Stockout risk: {risk.upper()}**")
+    st.markdown(f"**Stockout risk: {risk.upper()}**")
 
     mc1, mc2 = st.columns(2)
     mc1.metric("Stock on hand",      f"{inv_item['stock_on_hand']:,.0f} {med['unit']}s")

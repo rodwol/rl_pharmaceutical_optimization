@@ -170,6 +170,43 @@ class RegimeBeliefInferrer:
         self._cache = None
 
 
+def load_pretrained_hmm(load_path: str = HMM_CACHE_PATH):
+    """Load the saved HMM model and its normalization stats."""
+    if not os.path.exists(load_path):
+        raise FileNotFoundError(
+            f"Pre-trained HMM not found at:\n  {load_path}\n"
+            f"Run train.py without --skip-pretrain first."
+        )
+    with open(load_path, "rb") as f:
+        data = pickle.load(f)
+    return data["model"], data["demand_mean"], data["demand_std"]
+
+
+def validate_pretrained_hmm(demand_df, load_path: str = HMM_CACHE_PATH):
+    """Validate the saved HMM by recomputing log-likelihood and printing stats."""
+    model, mean, std = load_pretrained_hmm(load_path)
+    daily_total = (
+        demand_df.groupby("date")["demand_units"]
+        .sum()
+        .sort_index()
+        .values
+        .astype(float)
+    )
+    X = ((daily_total - mean) / (std + 1e-8)).reshape(-1, 1)
+    score = model.score(X)
+
+    print(f"Loaded pretrained HMM from: {load_path}")
+    print(f"  Log-likelihood : {score:.2f}")
+    print(f"  Transition matrix:\n{np.round(model.transmat_, 3)}")
+    print(f"  Emission means : {model.means_.flatten().round(3)}")
+    return {
+        "model": model,
+        "score": score,
+        "transition_matrix": model.transmat_,
+        "means": model.means_.flatten(),
+    }
+
+
 # ─────────────────────────────────────────────────────────────────────────
 # REGIME SEQUENCE GENERATOR
 # Drives ground-truth demand in the environment.

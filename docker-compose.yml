@@ -3,8 +3,6 @@
 #   cp .env.example .env
 #   docker-compose up --build
 
-version: "3.9"
-
 services:
 
   db:
@@ -13,7 +11,9 @@ services:
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-rxguard}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-rxguard_dev}
-      POSTGRES_DB: ${POSTGRES_DB:-rxguard_db}
+      POSTGRES_DB: ${POSTGRES_DB:-rebex_db}
+    env_file:
+      - .env
     ports:
       - "5432:5432"
     volumes:
@@ -31,9 +31,7 @@ services:
     ports:
       - "8000:8000"
     environment:
-      DATABASE_URL: os.getenv("DATABASE_URL")
-    env_file:
-      - .env
+      DATABASE_URL: postgresql://rxguard:rxguard_dev@db:5432/rebex_db
     volumes:
       - ./models:/app/models:ro
     depends_on:
@@ -48,13 +46,11 @@ services:
   dashboard:
     build: .
     restart: unless-stopped
-    command: streamlit run dashboard/app.py --server.port 8501 --server.headless true
+    command: streamlit run dashboard/Home.py --server.port 8501 --server.headless true
     ports:
       - "8501:8501"
     environment:
       REBEX_API_URL: http://api:8000
-    env_file:
-      - .env
     volumes:
       - ./models:/app/models:ro
     depends_on:
